@@ -1,7 +1,5 @@
 #! /bin/bash
 
-set -e
-
 PGID=${PGID:-0}
 PUID=${PUID:-0}
 

@@ -1,8 +1,6 @@
 # [Docker Nicotine+](https://github.com/mrgasparov/nicotine-novnc)
 
-![plot](./docs/nicotine-novnc-welcome.png)
-
-## Introduction
+[![Docker Build and Push](https://github.com/mrgasparov/nicotine-novnc/actions/workflows/docker-build.yml/badge.svg)](https://github.com/mrgasparov/nicotine-novnc/actions/workflows/docker-build.yml)
 
 [Nicotine+](https://nicotine-plus.org/) is a graphical client for the Soulseek peer-to-peer network. It aims to be a lightweight, pleasant, free and open source (FOSS) alternative to the official Soulseek client, while also providing a comprehensive set of features.
 
@@ -10,9 +8,7 @@
 
 This docker image allows you to run Nicotine+ on a Raspberry Pi or your NAS, and access it via the browser from your laptop. It includes the latest Nicotine+ version running on GTK4 and is built to ensure a simple and secure setup.
 
-### Acknowledgements
-
-This docker image is based on the excelent [realies/soulseek-docker](https://github.com/realies/soulseek-docker), which uses SoulseekQT instead of Nicotine+.
+![plot](./docs/nicotine-novnc-welcome.png)
 
 ## Supported Architectures
 
@@ -94,3 +90,7 @@ docker run -d \
 | :----: | ---
 | `/config` | Path to persistently mount Nicotine+ configuration folder
 | `/downloads` | Path to persistently mount download folder
+
+## Acknowledgements
+
+This docker image is based on the excelent [realies/soulseek-docker](https://github.com/realies/soulseek-docker), which uses SoulseekQT instead of Nicotine+.
