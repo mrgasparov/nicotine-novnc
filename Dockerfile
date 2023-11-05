@@ -23,9 +23,9 @@ RUN mkdir /usr/share/novnc && \
 
 RUN useradd -u 1000 -U -d /data -s /bin/false nicotine && \
   usermod -G users nicotine && \
-  mkdir -p /data/.config/nicotine /downloads && \
+  mkdir -p /data/.local/share/nicotine /downloads && \
   chown nicotine:nicotine /downloads && \
-  ln -s /data/.config/nicotine /config
+  ln -s /data/.local/share/nicotine /config
 
 ENV PIPX_HOME=/app
 
