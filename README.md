@@ -6,7 +6,7 @@
 
 [noVNC](https://novnc.com) is an open source VNC client which is both a VNC client JavaScript library as well as an application built on top of that library.
 
-This docker image allows you to run Nicotine+ on a Raspberry Pi or your NAS, and access it via the browser from your laptop. It includes the latest Nicotine+ version running on GTK4 and is built to ensure a simple and secure setup.
+This docker image allows you to run Nicotine+ on a Raspberry Pi or on your NAS, and access it via the browser from your computer. It includes the latest Nicotine+ version running on GTK4 and is built to ensure a simple and secure setup.
 
 ![plot](./docs/nicotine-novnc-welcome.png)
 
@@ -17,7 +17,7 @@ Simply pulling `mrgasparov/nicotine-novnc:latest` should retrieve the correct im
 | Architecture | Available | Devices
 | :----: | :----: | ---
 | x86-64 | ✅ | Synology NAS, PC, Intel Mac
-| arm64 | ✅ | Raspberry Pi 4, M1 Mac
+| arm64 | ✅ | Raspberry Pi 4, Apple Silicon
 | armhf | ✅ | Raspberry Pi 3
 
 ## Deployment
@@ -39,7 +39,7 @@ services:
       - "6080:6080" # UI port
       - "2234-2239:2234-2239" # Listening port range
     volumes:
-      - /home/user/nicotine/config:/config
+      - /home/user/nicotine/data:/data
       - /home/user/nicotine/downloads:/downloads
 ```
 
@@ -54,7 +54,7 @@ docker run -d \
   -e PGID=1000 \
   -p 6080:6080 \
   -p 2234-2239:2234-2239 \
-  -v /home/user/nicotine/config:/config \
+  -v /home/user/nicotine/data:/data \
   -v /home/user/nicotine/downloads:/downloads \
   --restart unless-stopped \
   mrgasparov/nicotine-novnc:latest
@@ -79,16 +79,16 @@ docker run -d \
 | Variable | Description | Required | Default
 | :----: | --- | :---: | :---:
 | `NOVNC_PORT` | Port for accessing Nicotine+ in the browser | No | `6080`
-| `RESOLUTION` | Set a resolution for Nicotine+ | No | `1280x720`
+| `RESOLUTION` | Set the screen resolution for Nicotine+ | No | `1280x720`
 | `PUID` | Match internal user ID to the ID of your host user. Needs `PGID` to be set | No | `0` (root)
 | `PGID` | Match internal group ID to the ID of your host group. Needs **`PUID`** to be set  | No | `0` (root)
-| `UMASK` | Defines permissions for newly created files. Defaults to  | No | `0000`
+| `UMASK` | Defines permissions for newly created files  | No | `0000`
 
 ### Volumes
 
 | Volume | Description
 | :----: | ---
-| `/config` | Path to persistently mount Nicotine+ configuration folder
+| `/data` | Path to persistently mount Nicotine+ application data and configuration
 | `/downloads` | Path to persistently mount download folder
 
 ## Acknowledgements

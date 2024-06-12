@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim
 
-ARG NICOTINE_VERSION=3.2.9
+ARG NICOTINE_VERSION=3.3.4
 ARG NOVNC_VERSION=1.4.0
 ARG WEBSOCKIFY_VERSION=0.11.0
 
@@ -23,14 +23,13 @@ RUN mkdir /usr/share/novnc && \
 
 RUN useradd -u 1000 -U -d /data -s /bin/false nicotine && \
   usermod -G users nicotine && \
-  mkdir -p /data/.local/share/nicotine /downloads && \
-  chown nicotine:nicotine /downloads && \
-  ln -s /data/.local/share/nicotine /config
+  mkdir /downloads && \
+  chown nicotine:nicotine /downloads
 
 ENV PIPX_HOME=/app
 
 RUN apt-get install -y \
-  gir1.2-adw-1 \
+  gir1.2-adw-1 \    
   gir1.2-gspell-1 \
   gir1.2-gtk-4.0\
   libcairo2-dev \
@@ -39,8 +38,12 @@ RUN apt-get install -y \
   python3 \
   python3-dev \
   python3-gdbm \
-  python3-gi && \
-  pipx install nicotine-plus==${NICOTINE_VERSION}
+  python3-gi \
+  ninja-build
+
+# install ninja-build using apt because pipx fails to build the package on ARM
+
+RUN pipx install nicotine-plus==${NICOTINE_VERSION}
 
 RUN chown -R nicotine:nicotine /app
 
@@ -49,7 +52,8 @@ RUN apt-get --purge remove -y \
   libcairo2-dev \
   libgirepository1.0-dev \
   pipx \
-  python3-dev && \
+  python3-dev \
+  ninja-build && \
   apt autoremove -y && \
   apt-get clean && \
   rm -rf \
@@ -62,6 +66,6 @@ COPY ./usr /usr
 COPY ./scripts/init.sh /tmp/init.sh
 
 EXPOSE 6080/tcp
-VOLUME ["/config","/downloads"]
+VOLUME ["/data","/downloads"]
 
 CMD ["/bin/bash", "-c", "/tmp/init.sh;/usr/bin/supervisord -c /etc/supervisord.conf"]
