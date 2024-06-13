@@ -27,7 +27,7 @@ Simply pulling `mrgasparov/nicotine-novnc:latest` should retrieve the correct im
 ```yaml
 services:
   nicotine:
-    image: mrgasparov/nicotine-novnc:2.0
+    image: mrgasparov/nicotine-novnc:latest
     container_name: nicotine
     restart: unless-stopped
     environment:
