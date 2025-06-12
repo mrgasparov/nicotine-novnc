@@ -29,17 +29,20 @@ RUN useradd -u 1000 -U -d /data -s /bin/false nicotine && \
 ENV PIPX_HOME=/app
 
 RUN apt-get install -y \
-  gir1.2-adw-1 \    
+  gir1.2-adw-1 \
   gir1.2-gspell-1 \
-  gir1.2-gtk-4.0\
+  gir1.2-gtk-4.0 \
   libcairo2-dev \
   libgirepository1.0-dev \
-  pipx \
+  libgirepository1.0-1 \
+  libglib2.0-dev \
+  libgtk-4-dev \
   python3 \
   python3-dev \
   python3-gdbm \
   python3-gi \
-  ninja-build
+  ninja-build \
+  pipx
 
 # install ninja-build using apt because pipx fails to build the package on ARM
 
@@ -51,9 +54,11 @@ RUN apt-get --purge remove -y \
   curl \
   libcairo2-dev \
   libgirepository1.0-dev \
-  pipx \
+  libglib2.0-dev \
+  libgtk-4-dev \
   python3-dev \
-  ninja-build && \
+  ninja-build \
+  pipx && \
   apt autoremove -y && \
   apt-get clean && \
   rm -rf \
