@@ -1,8 +1,8 @@
-FROM debian:bookworm-slim
+FROM debian:sid-slim
 
 ARG NICOTINE_VERSION=3.3.10
-ARG NOVNC_VERSION=1.4.0
-ARG WEBSOCKIFY_VERSION=0.11.0
+ARG NOVNC_VERSION=1.6.0
+ARG WEBSOCKIFY_VERSION=0.13.0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   curl \
@@ -33,15 +33,14 @@ RUN apt-get install -y \
   gir1.2-gspell-1 \
   gir1.2-gtk-4.0 \
   libcairo2-dev \
-  libgirepository1.0-dev \
-  libgirepository1.0-1 \
+  libgirepository-2.0-dev \
   libglib2.0-dev \
   libgtk-4-dev \
   python3 \
   python3-dev \
   python3-gdbm \
   python3-gi \
-  ninja-build \
+  meson \
   pipx
 
 # install ninja-build using apt because pipx fails to build the package on ARM
@@ -53,11 +52,11 @@ RUN chown -R nicotine:nicotine /app
 RUN apt-get --purge remove -y \
   curl \
   libcairo2-dev \
-  libgirepository1.0-dev \
+  libgirepository-2.0-dev \
   libglib2.0-dev \
   libgtk-4-dev \
   python3-dev \
-  ninja-build \
+  meson \
   pipx && \
   apt autoremove -y && \
   apt-get clean && \
