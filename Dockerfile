@@ -29,7 +29,7 @@ RUN useradd -u 1000 -U -d /data -s /bin/false nicotine && \
 ENV PIPX_HOME=/app
 
 RUN apt-get install -y \
-  gir1.2-adw-1 \
+  gir1.2-adw-1 \  
   gir1.2-gspell-1 \
   gir1.2-gtk-4.0 \
   libcairo2-dev \
@@ -43,8 +43,6 @@ RUN apt-get install -y \
   meson \
   pipx
 
-# install ninja-build using apt because pipx fails to build the package on ARM
-
 RUN pipx install nicotine-plus==${NICOTINE_VERSION}
 
 RUN chown -R nicotine:nicotine /app
@@ -52,13 +50,11 @@ RUN chown -R nicotine:nicotine /app
 RUN apt-get --purge remove -y \
   curl \
   libcairo2-dev \
-  libgirepository-2.0-dev \
   libglib2.0-dev \
   libgtk-4-dev \
   python3-dev \
   meson \
   pipx && \
-  apt autoremove -y && \
   apt-get clean && \
   rm -rf \
   /tmp/* \
