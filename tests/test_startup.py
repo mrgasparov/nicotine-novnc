@@ -98,7 +98,7 @@ class StartupTests(unittest.TestCase):
         self.assertTrue(attempts.exists())
         self.assertEqual(
             result.stdout.splitlines(),
-            ["-fg", "-display", ":1", "-rfbport", "5901", "-localhost", "-SecurityTypes", "None"],
+            ["-fg", "-display", ":1", "-rfbport", "5901", "-localhost", "-UseSHM=0", "-SecurityTypes", "None"],
         )
 
     def test_vnc_exits_when_display_never_becomes_ready(self):
