@@ -9,7 +9,7 @@ childlogdir = /tmp
 [program:xvfb]
 user=${USERNAME}
 environment=HOME="/tmp",USER="${USERNAME}"
-command=/usr/bin/Xvfb :1 -screen 0 ${RESOLUTION}x16
+command=/usr/bin/Xvfb :1 -screen 0 ${RESOLUTION}x24
 autorestart=true
 priority=100
 
@@ -18,6 +18,8 @@ user=${USERNAME}
 environment=HOME="/tmp",USER="${USERNAME}"
 command=/usr/local/bin/start-vnc.sh
 autorestart=true
+stopasgroup=true
+killasgroup=true
 startsecs=1
 priority=200
 
@@ -27,6 +29,13 @@ environment=HOME="/tmp",DISPLAY=":1",USER="${USERNAME}"
 command=/usr/bin/openbox
 autorestart=true
 priority=300
+
+[program:picom]
+user=${USERNAME}
+environment=HOME="/tmp",DISPLAY=":1",USER="${USERNAME}"
+command=/usr/bin/picom --backend xrender --no-vsync
+autorestart=true
+priority=350
 
 [program:novnc]
 user=${USERNAME}

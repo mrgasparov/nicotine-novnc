@@ -69,6 +69,7 @@ docker run -d \
 2. Open the preferences window
 ![plot](./docs/nicotine-novnc-setup-1.png)
 3. Enter your username and password and choose listening port. The listening port must be within the range of the ports you exposed during deployment (i.e. `2234-2239`)
+For inbound connections, configure port forwarding on your router manually; Nicotine+ 3.3.11 disables automatic port forwarding in Docker.
 ![plot](./docs/nicotine-novnc-setup-2.png)
 4. Choose your incomplete, downloads and uploads folders, which should be located under the `/downloads` folder
 ![plot](./docs/nicotine-novnc-setup-3.png)

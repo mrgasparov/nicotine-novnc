@@ -51,14 +51,14 @@ class StartupTests(unittest.TestCase):
     def test_default_resolution_and_port(self):
         result = self.run_init()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("-screen 0 1280x720x16", result.stdout)
+        self.assertIn("-screen 0 1280x720x24", result.stdout)
         self.assertIn("--listen 6080", result.stdout)
 
     def test_rerender_uses_updated_values_without_changing_template(self):
         self.assertEqual(self.run_init().returncode, 0)
         result = self.run_init(RESOLUTION="1920x1080", NOVNC_PORT="7080")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("-screen 0 1920x1080x16", result.stdout)
+        self.assertIn("-screen 0 1920x1080x24", result.stdout)
         self.assertIn("--listen 7080", result.stdout)
         self.assertEqual(self.template.read_bytes(), self.initial_template)
 
@@ -98,7 +98,7 @@ class StartupTests(unittest.TestCase):
         self.assertTrue(attempts.exists())
         self.assertEqual(
             result.stdout.splitlines(),
-            ["-display", ":1", "-rfbport", "5901", "-localhost", "-SecurityTypes", "None"],
+            ["-fg", "-display", ":1", "-rfbport", "5901", "-localhost", "-SecurityTypes", "None"],
         )
 
     def test_vnc_exits_when_display_never_becomes_ready(self):
