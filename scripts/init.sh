@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -euo pipefail
+
 PGID=${PGID:-0}
 PUID=${PUID:-0}
 
@@ -11,13 +13,17 @@ if [ "$PGID" -ne 0 ] && [ "$PUID" -ne 0 ]; then
   chown -R nicotine:nicotine /data
 fi
 
-[ -n "$TZ" ] && [ -f "/usr/share/zoneinfo/$TZ" ] && ln -sf "/usr/share/zoneinfo/$TZ" /etc/localtime
+if [ -n "${TZ:-}" ] && [ -f "/usr/share/zoneinfo/$TZ" ]; then
+  ln -sf "/usr/share/zoneinfo/$TZ" /etc/localtime
+fi
 
-RESOLUTION=${RESOLUTION:-"1280x720"}
+export RESOLUTION=${RESOLUTION:-"1280x720"}
 export NOVNC_PORT=${NOVNC_PORT:-"6080"}
-export USERNAME=$(getent passwd "$PUID" | cut -d: -f1)
+USERNAME=$(getent passwd "$PUID" | cut -d: -f1)
+export USERNAME
 
-supervisor_conf="/etc/supervisord.conf"
-template=$(<"$supervisor_conf")
-result=$(echo "$template" | envsubst)
-exec echo "$result" > $supervisor_conf
+supervisor_conf="/tmp/supervisord.conf"
+envsubst '${USERNAME} ${RESOLUTION} ${NOVNC_PORT} ${PIPX_HOME}' \
+  < /etc/supervisord.conf.template > "$supervisor_conf"
+
+exec supervisord -c "$supervisor_conf"

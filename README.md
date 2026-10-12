@@ -24,6 +24,9 @@ Simply pulling `mrgasparov/nicotine-novnc:latest` should retrieve the correct im
 
 ### docker-compose
 
+Download [`compose.yaml`](./compose.yaml), adjust the host volume paths and
+`PUID`/`PGID` for your machine, then run `docker compose up -d`.
+
 ```yaml
 services:
   nicotine:
@@ -32,7 +35,7 @@ services:
     restart: unless-stopped
     environment:
       - RESOLUTION=1920x1080
-      - PORT=6080
+      - NOVNC_PORT=6080
       - PUID=1000
       - PGID=1000
     ports:
@@ -48,7 +51,7 @@ services:
 ```bash
 docker run -d \
   --name=nicotine-novnc \
-  -e PORT=6080 \
+  -e NOVNC_PORT=6080 \
   -e RESOLUTION=1920x1080 \
   -e PUID=1000 \
   -e PGID=1000 \

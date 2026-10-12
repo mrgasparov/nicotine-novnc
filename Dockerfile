@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   software-properties-common \
   supervisor \
   tigervnc-scraping-server \
+  x11-utils \
   xvfb
 
 RUN mkdir /usr/share/novnc && \
@@ -63,9 +64,10 @@ RUN apt-get --purge remove -y \
 
 COPY ./etc /etc
 COPY ./usr /usr
-COPY ./scripts/init.sh /tmp/init.sh
+COPY ./scripts /usr/local/bin
+RUN chmod +x /usr/local/bin/init.sh /usr/local/bin/start-vnc.sh
 
 EXPOSE 6080/tcp
 VOLUME ["/data","/downloads"]
 
-CMD ["/bin/bash", "-c", "/tmp/init.sh;/usr/bin/supervisord -c /etc/supervisord.conf"]
+CMD ["/usr/local/bin/init.sh"]
