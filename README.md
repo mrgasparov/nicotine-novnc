@@ -6,9 +6,22 @@
 
 [noVNC](https://novnc.com) is an open source VNC client which is both a VNC client JavaScript library as well as an application built on top of that library.
 
-This docker image allows you to run Nicotine+ on a Raspberry Pi or on your NAS, and access it via the browser from your computer. It includes the latest Nicotine+ version running on GTK4 and is built to ensure a simple and secure setup.
+This Docker image runs Nicotine+ on a Raspberry Pi, NAS, or computer and gives you access through a browser. The desktop uses GTK4, with SVG icons, transparent menus, and compositing configured to prevent black rendering artifacts.
 
-![plot](./docs/nicotine-novnc-welcome.png)
+The main window fills the desktop. Dialogs such as About open centered, can be closed with the mouse, and have visible borders and soft shadows to distinguish overlapping windows.
+
+### Included versions
+
+| Component | Version |
+| --- | --- |
+| Nicotine+ | 3.3.11 |
+| noVNC | 1.7.0 |
+| websockify | 0.13.0 |
+| Base image | Debian trixie-slim |
+
+These are the versions pinned in this repository; published images are updated through tagged releases.
+
+![Nicotine+ browser desktop](./docs/nicotine-novnc-welcome.png)
 
 ## Supported Architectures
 
@@ -22,7 +35,9 @@ Simply pulling `mrgasparov/nicotine-novnc:latest` should retrieve the correct im
 
 ## Deployment
 
-### docker-compose
+The browser endpoint has no login protection or TLS by default. Use it on a trusted network, or put it behind an authenticated HTTPS reverse proxy before allowing remote access.
+
+### Docker Compose
 
 Download [`compose.yaml`](./compose.yaml), adjust the host volume paths and
 `PUID`/`PGID` for your machine, then run `docker compose up -d`.
@@ -46,7 +61,7 @@ services:
       - /home/user/nicotine/downloads:/downloads
 ```
 
-### docker cli
+### Docker CLI
 
 ```bash
 docker run -d \
@@ -65,16 +80,22 @@ docker run -d \
 
 ## Usage
 
-1. Open your browser and go to `[device-ip]:6080`
-2. Open the preferences window
-![plot](./docs/nicotine-novnc-setup-1.png)
-3. Enter your username and password and choose listening port. The listening port must be within the range of the ports you exposed during deployment (i.e. `2234-2239`)
-For inbound connections, configure port forwarding on your router manually; Nicotine+ 3.3.11 disables automatic port forwarding in Docker.
-![plot](./docs/nicotine-novnc-setup-2.png)
-4. Choose your incomplete, downloads and uploads folders, which should be located under the `/downloads` folder
-![plot](./docs/nicotine-novnc-setup-3.png)
-5. Choose the folders you want to share, which should be located under the `/downloads` folder
-![plot](./docs/nicotine-novnc-setup-4.png)
+1. Open `http://<device-ip>:6080` in your browser.
+2. Open Preferences.
+
+   ![Opening Nicotine+ preferences](./docs/nicotine-novnc-setup-1.png)
+
+3. Enter your Soulseek username and password and choose a listening port within the published range (`2234-2239` in the examples). For inbound connections from outside your network, forward that TCP port on your router to the Docker host. Nicotine+ 3.3.11 disables automatic router port forwarding in Docker.
+
+   ![Soulseek account and listening port settings](./docs/nicotine-novnc-setup-2.png)
+
+4. Choose your download and incomplete-download folders under `/downloads` so files persist on the host.
+
+   ![Download folder settings](./docs/nicotine-novnc-setup-3.png)
+
+5. Choose folders to share under `/downloads`.
+
+   ![Shared folder settings](./docs/nicotine-novnc-setup-4.png)
 
 ## Parameters
 
@@ -82,11 +103,16 @@ For inbound connections, configure port forwarding on your router manually; Nico
 
 | Variable | Description | Required | Default
 | :----: | --- | :---: | :---:
-| `NOVNC_PORT` | Port for accessing Nicotine+ in the browser | No | `6080`
-| `RESOLUTION` | Set the screen resolution for Nicotine+ | No | `1280x720`
+| `NOVNC_PORT` | Browser port inside the container; match the container side of the port mapping | No | `6080`
+| `RESOLUTION` | Desktop size in `WIDTHxHEIGHT` format; applied at container startup | No | `1280x720`
 | `PUID` | Match internal user ID to the ID of your host user. Needs `PGID` to be set | No | `0` (root)
 | `PGID` | Match internal group ID to the ID of your host group. Needs **`PUID`** to be set  | No | `0` (root)
 | `UMASK` | Defines permissions for newly created files  | No | `0000`
+| `TZ` | Time zone, such as `Europe/Berlin` | No | Base image default (UTC)
+
+Set both `PUID` and `PGID` to nonzero values to run the desktop as that user. On Linux, use `id -u` and `id -g` to find your IDs, and make sure that user can write to both mounted host directories. Startup adjusts ownership of `/data`; it does not change ownership of the mounted `/downloads` directory.
+
+To change only the host browser port, use a mapping such as `7080:6080` and leave `NOVNC_PORT=6080`. Recreate the container after changing environment variables in Compose.
 
 ### Volumes
 
@@ -95,6 +121,24 @@ For inbound connections, configure port forwarding on your router manually; Nico
 | `/data` | Path to persistently mount Nicotine+ application data and configuration
 | `/downloads` | Path to persistently mount download folder
 
+## Updating
+
+Back up `/data` before upgrading. For Compose deployments, keep your volume paths and run:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+For Docker CLI deployments, pull the image and recreate the container using the same volume paths and settings. Keep both host directories to retain configuration and downloads.
+
+The default dialog border stylesheet is installed at `/data/.config/gtk-4.0/gtk.css` when that path does not already exist. Existing custom styles are preserved; see [troubleshooting](./docs/troubleshooting.md) if borders are missing after an upgrade.
+
+## Documentation
+
+- [Troubleshooting](./docs/troubleshooting.md): browser access, rendering, dialog borders, permissions, and incoming connections.
+- [Development](./docs/development.md): local builds, version pins, desktop components, and tests.
+
 ## Acknowledgements
 
-This docker image is based on the excelent [realies/soulseek-docker](https://github.com/realies/soulseek-docker), which uses SoulseekQT instead of Nicotine+.
+This Docker image is based on the excellent [realies/soulseek-docker](https://github.com/realies/soulseek-docker), which uses SoulseekQT instead of Nicotine+.
