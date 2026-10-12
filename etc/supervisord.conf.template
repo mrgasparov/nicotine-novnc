@@ -33,7 +33,7 @@ priority=300
 [program:picom]
 user=${USERNAME}
 environment=HOME="/tmp",DISPLAY=":1",USER="${USERNAME}"
-command=/usr/bin/picom --backend xrender --no-vsync --no-use-damage
+command=/usr/bin/picom --backend xrender --no-vsync --no-use-damage --shadow --shadow-radius 8 --shadow-opacity 0.25
 autorestart=true
 priority=350
 

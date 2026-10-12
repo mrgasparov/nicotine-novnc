@@ -4,11 +4,31 @@
     <number>1</number>
     <popupTime>0</popupTime>
   </desktops>
+  <theme>
+    <titleLayout>LC</titleLayout>
+  </theme>
+  <mouse>
+    <context name="Close">
+      <mousebind button="Left" action="Click">
+        <action name="Close"/>
+      </mousebind>
+    </context>
+  </mouse>
   <applications>
     <application class="*">
       <maximized>yes</maximized>
       <fullscreen>yes</fullscreen>
       <decor>no</decor>
+    </application>
+    <application type="dialog">
+      <maximized>no</maximized>
+      <fullscreen>no</fullscreen>
+      <decor>yes</decor>
+      <position force="yes">
+        <x>center</x>
+        <y>center</y>
+        <monitor>1</monitor>
+      </position>
     </application>
   </applications>
 </openbox_config>

@@ -1,0 +1,4 @@
+/* Outline GTK's own dialog frames in both light and dark themes. */
+window.csd:not(.fullscreen) {
+  border: 2px solid alpha(currentColor, 0.4);
+}

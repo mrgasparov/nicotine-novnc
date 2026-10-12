@@ -32,6 +32,8 @@ class StartupTests(unittest.TestCase):
         source = (ROOT / "scripts/init.sh").read_text()
         source = source.replace("/etc/supervisord.conf.template", str(self.template))
         source = source.replace("/tmp/supervisord.conf", str(self.config))
+        source = source.replace("/etc/nicotine/gtk.css", str(ROOT / "etc/nicotine/gtk.css"))
+        source = source.replace("/data", str(self.directory / "data"))
         self.init = self.directory / "init.sh"
         self.init.write_text(source)
 
@@ -68,6 +70,14 @@ class StartupTests(unittest.TestCase):
         result = self.run_init()
         self.assertEqual(result.returncode, 17)
         self.assertNotIn("supervisor-started", result.stdout)
+
+    def test_existing_gtk_stylesheet_is_preserved(self):
+        stylesheet = self.directory / "data/.config/gtk-4.0/gtk.css"
+        stylesheet.parent.mkdir(parents=True)
+        stylesheet.write_text("/* custom GTK style */")
+        result = self.run_init()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(stylesheet.read_text(), "/* custom GTK style */")
 
     def test_user_lookup_failure_does_not_launch_supervisor(self):
         self.mock("getent", "exit 2")

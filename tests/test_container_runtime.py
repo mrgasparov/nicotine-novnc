@@ -12,6 +12,7 @@ STATE_SCRIPT = """
 import json, os, socket
 from pathlib import Path
 os.environ['DISPLAY'] = ':1'
+os.environ['HOME'] = '/data'
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('GdkPixbuf', '2.0')
@@ -20,6 +21,12 @@ Gtk.init()
 assert Gdk.Display.get_default().is_composited(), 'GTK popup transparency needs a compositor'
 icon = next(Path('/usr/share/icons/Adwaita').rglob('dialog-warning-symbolic.svg'))
 assert GdkPixbuf.Pixbuf.new_from_file(str(icon)), 'GTK SVG icon could not be decoded'
+dialog = Gtk.Window()
+dialog.set_titlebar(Gtk.HeaderBar())
+dialog.realize()
+border = dialog.get_style_context().get_border()
+assert min(border.top, border.right, border.bottom, border.left) > 0, 'GTK window border missing'
+dialog.destroy()
 server = next(path.parent for path in Path('/proc').glob('[0-9]*/comm')
               if path.read_text().strip() == 'X0tigervnc')
 def parent(path):
