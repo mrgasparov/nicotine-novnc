@@ -32,6 +32,8 @@ class StartupTests(unittest.TestCase):
         source = (ROOT / "scripts/init.sh").read_text()
         source = source.replace("/etc/supervisord.conf.template", str(self.template))
         source = source.replace("/tmp/supervisord.conf", str(self.config))
+        source = source.replace("/etc/nicotine/gtk.css", str(ROOT / "etc/nicotine/gtk.css"))
+        source = source.replace("/data", str(self.directory / "data"))
         self.init = self.directory / "init.sh"
         self.init.write_text(source)
 
@@ -51,14 +53,14 @@ class StartupTests(unittest.TestCase):
     def test_default_resolution_and_port(self):
         result = self.run_init()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("-screen 0 1280x720x16", result.stdout)
+        self.assertIn("-screen 0 1280x720x24", result.stdout)
         self.assertIn("--listen 6080", result.stdout)
 
     def test_rerender_uses_updated_values_without_changing_template(self):
         self.assertEqual(self.run_init().returncode, 0)
         result = self.run_init(RESOLUTION="1920x1080", NOVNC_PORT="7080")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("-screen 0 1920x1080x16", result.stdout)
+        self.assertIn("-screen 0 1920x1080x24", result.stdout)
         self.assertIn("--listen 7080", result.stdout)
         self.assertEqual(self.template.read_bytes(), self.initial_template)
 
@@ -68,6 +70,14 @@ class StartupTests(unittest.TestCase):
         result = self.run_init()
         self.assertEqual(result.returncode, 17)
         self.assertNotIn("supervisor-started", result.stdout)
+
+    def test_existing_gtk_stylesheet_is_preserved(self):
+        stylesheet = self.directory / "data/.config/gtk-4.0/gtk.css"
+        stylesheet.parent.mkdir(parents=True)
+        stylesheet.write_text("/* custom GTK style */")
+        result = self.run_init()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(stylesheet.read_text(), "/* custom GTK style */")
 
     def test_user_lookup_failure_does_not_launch_supervisor(self):
         self.mock("getent", "exit 2")
@@ -98,7 +108,7 @@ class StartupTests(unittest.TestCase):
         self.assertTrue(attempts.exists())
         self.assertEqual(
             result.stdout.splitlines(),
-            ["-display", ":1", "-rfbport", "5901", "-localhost", "-SecurityTypes", "None"],
+            ["-fg", "-display", ":1", "-rfbport", "5901", "-localhost", "-UseSHM=0", "-SecurityTypes", "None"],
         )
 
     def test_vnc_exits_when_display_never_becomes_ready(self):

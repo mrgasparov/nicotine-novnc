@@ -1,7 +1,7 @@
 FROM debian:trixie-slim
 
-ARG NICOTINE_VERSION=3.3.10
-ARG NOVNC_VERSION=1.6.0
+ARG NICOTINE_VERSION=3.3.11
+ARG NOVNC_VERSION=1.7.0
 ARG WEBSOCKIFY_VERSION=0.13.0
 
 # Keep the existing application path used by the Supervisor template.
@@ -16,8 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   gir1.2-adw-1 \
   gir1.2-gspell-1 \
   gir1.2-gtk-4.0 \
+  librsvg2-common \
   net-tools \
   openbox \
+  picom \
   python3 \
   python3-cairo \
   python3-gdbm \
