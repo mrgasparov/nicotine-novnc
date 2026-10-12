@@ -1,0 +1,16 @@
+services:
+  nicotine:
+    image: mrgasparov/nicotine-novnc:latest
+    container_name: nicotine
+    restart: unless-stopped
+    environment:
+      - RESOLUTION=1920x1080
+      - NOVNC_PORT=6080
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "6080:6080" # UI port
+      - "2234-2239:2234-2239" # Listening port range
+    volumes:
+      - /home/user/nicotine/data:/data
+      - /home/user/nicotine/downloads:/downloads

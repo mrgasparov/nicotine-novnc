@@ -16,10 +16,9 @@ priority=100
 [program:vncserver]
 user=${USERNAME}
 environment=HOME="/tmp",USER="${USERNAME}"
-command=/usr/bin/x0vncserver :1 -SecurityTypes None
-autorestart=false
-startsecs=0
-exitcodes=0
+command=/usr/local/bin/start-vnc.sh
+autorestart=true
+startsecs=1
 priority=200
 
 [program:openbox]
