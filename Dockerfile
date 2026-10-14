@@ -27,9 +27,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   python3-gi-cairo \
   python3-venv \
   supervisor \
-  tigervnc-scraping-server \
-  x11-utils \
-  xvfb && \
+  tigervnc-standalone-server \
+  x11-utils && \
   mkdir /usr/share/novnc && \
   curl -fL# https://github.com/novnc/noVNC/archive/refs/tags/v${NOVNC_VERSION}.tar.gz -o /tmp/novnc.tar.gz && \
   tar -xf /tmp/novnc.tar.gz --strip-components=1 -C /usr/share/novnc && \
@@ -51,7 +50,7 @@ RUN useradd -u 1000 -U -d /data -s /bin/false nicotine && \
 COPY ./etc /etc
 COPY ./usr /usr
 COPY ./scripts /usr/local/bin
-RUN chmod +x /usr/local/bin/init.sh /usr/local/bin/start-vnc.sh
+RUN chmod +x /usr/local/bin/init.sh
 
 EXPOSE 6080/tcp
 VOLUME ["/data","/downloads"]

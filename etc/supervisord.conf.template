@@ -6,22 +6,15 @@ pidfile = /tmp/supervisord.pid
 directory = /tmp
 childlogdir = /tmp
 
-[program:xvfb]
-user=${USERNAME}
-environment=HOME="/tmp",USER="${USERNAME}"
-command=/usr/bin/Xvfb :1 -screen 0 ${RESOLUTION}x24
-autorestart=true
-priority=100
-
 [program:vncserver]
 user=${USERNAME}
 environment=HOME="/tmp",USER="${USERNAME}"
-command=/usr/local/bin/start-vnc.sh
+command=/usr/bin/Xtigervnc :1 -geometry ${RESOLUTION} -depth 24 -rfbport 5901 -localhost -SecurityTypes None -nolisten tcp -FrameRate 30
 autorestart=true
 stopasgroup=true
 killasgroup=true
 startsecs=1
-priority=200
+priority=100
 
 [program:openbox]
 user=${USERNAME}

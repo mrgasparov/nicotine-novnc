@@ -53,14 +53,14 @@ class StartupTests(unittest.TestCase):
     def test_default_resolution_and_port(self):
         result = self.run_init()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("-screen 0 1280x720x24", result.stdout)
+        self.assertIn("-geometry 1280x720 -depth 24", result.stdout)
         self.assertIn("--listen 6080", result.stdout)
 
     def test_rerender_uses_updated_values_without_changing_template(self):
         self.assertEqual(self.run_init().returncode, 0)
         result = self.run_init(RESOLUTION="1920x1080", NOVNC_PORT="7080")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("-screen 0 1920x1080x24", result.stdout)
+        self.assertIn("-geometry 1920x1080 -depth 24", result.stdout)
         self.assertIn("--listen 7080", result.stdout)
         self.assertEqual(self.template.read_bytes(), self.initial_template)
 
@@ -86,39 +86,14 @@ class StartupTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("supervisor-started", result.stdout)
 
-    def run_vnc(self):
-        return subprocess.run(
-            ["bash", str(ROOT / "scripts/start-vnc.sh")],
-            env=self.env,
-            capture_output=True,
-            text=True,
-        )
-
-    def test_vnc_waits_for_display_and_passes_explicit_options(self):
-        attempts = self.directory / "attempts"
-        self.mock(
-            "xdpyinfo",
-            f'if [ -f "{attempts}" ]; then exit 0; fi\n'
-            f'touch "{attempts}"\nexit 1',
-        )
-        self.mock("sleep", "exit 0")
-        self.mock("x0vncserver", 'printf "%s\\n" "$@"')
-        result = self.run_vnc()
+    def test_integrated_display_is_supervised_and_vnc_is_loopback_only(self):
+        result = self.run_init()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertTrue(attempts.exists())
-        self.assertEqual(
-            result.stdout.splitlines(),
-            ["-fg", "-display", ":1", "-rfbport", "5901", "-localhost", "-UseSHM=0", "-SecurityTypes", "None"],
-        )
-
-    def test_vnc_exits_when_display_never_becomes_ready(self):
-        self.mock("xdpyinfo", "exit 1")
-        self.mock("sleep", "exit 0")
-        self.mock("x0vncserver", "echo vnc-started")
-        result = self.run_vnc()
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("did not become ready", result.stderr)
-        self.assertNotIn("vnc-started", result.stdout)
+        self.assertIn("command=/usr/bin/Xtigervnc :1", result.stdout)
+        self.assertIn("-rfbport 5901 -localhost -SecurityTypes None -nolisten tcp", result.stdout)
+        self.assertIn("-FrameRate 30", result.stdout)
+        self.assertNotIn("Xvfb", result.stdout)
+        self.assertNotIn("start-vnc.sh", result.stdout)
 
 
 if __name__ == "__main__":

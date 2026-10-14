@@ -6,7 +6,7 @@
 
 [noVNC](https://novnc.com) is an open source VNC client which is both a VNC client JavaScript library as well as an application built on top of that library.
 
-This Docker image runs Nicotine+ on a Raspberry Pi, NAS, or computer and gives you access through a browser. The desktop uses GTK4, with SVG icons, transparent menus, and compositing configured to prevent black rendering artifacts.
+This Docker image runs Nicotine+ on a Raspberry Pi, NAS, or computer and gives you access through a browser. The desktop uses GTK4 and an integrated TigerVNC display, with SVG icons, transparent menus, and compositing configured to prevent black rendering artifacts. The display replaces separate Xvfb and screen-capture processes, with VNC updates capped at 30 per second to limit encoding work.
 
 The main window fills the desktop. Dialogs such as About open centered, can be closed with the mouse, and have visible borders and soft shadows to distinguish overlapping windows.
 
@@ -136,7 +136,7 @@ The default dialog border stylesheet is installed at `/data/.config/gtk-4.0/gtk.
 
 ## Documentation
 
-- [Troubleshooting](./docs/troubleshooting.md): browser access, rendering, dialog borders, permissions, and incoming connections.
+- [Troubleshooting](./docs/troubleshooting.md): browser access, NAS responsiveness, rendering, dialog borders, permissions, and incoming connections.
 - [Development](./docs/development.md): local builds, version pins, desktop components, and tests.
 
 ## Acknowledgements
