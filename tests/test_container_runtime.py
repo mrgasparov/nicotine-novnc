@@ -9,7 +9,7 @@ import uuid
 
 
 STATE_SCRIPT = """
-import json, os, socket
+import json, os, socket, urllib.request
 from pathlib import Path
 os.environ['DISPLAY'] = ':1'
 os.environ['HOME'] = '/data'
@@ -28,18 +28,33 @@ border = dialog.get_style_context().get_border()
 assert min(border.top, border.right, border.bottom, border.left) > 0, 'GTK window border missing'
 dialog.destroy()
 server = next(path.parent for path in Path('/proc').glob('[0-9]*/comm')
-              if path.read_text().strip() == 'X0tigervnc')
+              if path.read_text().strip() == 'Xtigervnc')
 def parent(path):
     return next(line.split()[1] for line in (path / 'status').read_text().splitlines()
                 if line.startswith('PPid:'))
-wrapper = Path('/proc') / parent(server)
-assert (wrapper / 'comm').read_text().strip() == 'x0vncserver'
-assert parent(wrapper) == '1', 'VNC wrapper detached from Supervisor'
+assert parent(server) == '1', 'Integrated display detached from Supervisor'
+assert not any(path.read_text().strip() in ('Xvfb', 'X0tigervnc', 'x0vncserver')
+               for path in Path('/proc').glob('[0-9]*/comm')), 'Separate screen capture is still running'
+nicotine = next(path.parent for path in Path('/proc').glob('[0-9]*/comm')
+                if path.read_text().strip() == 'nicotine')
 assert b'supervisord' in Path('/proc/1/cmdline').read_bytes()
 assert 'FATAL' not in Path('/tmp/supervisord.log').read_text()
+listeners = []
+for table in ('tcp', 'tcp6'):
+    for line in (Path('/proc/net') / table).read_text().splitlines()[1:]:
+        fields = line.split()
+        if fields[3] == '0A':
+            address, port = fields[1].split(':')
+            listeners.append((address, int(port, 16)))
+vnc_addresses = [address for address, port in listeners if port == 5901]
+assert vnc_addresses and all(address in ('0100007F', '00000000000000000000000001000000')
+                             for address in vnc_addresses), 'VNC exposed beyond loopback'
+assert not any(port == 6001 for address, port in listeners), 'X11 TCP listening is enabled'
 with socket.create_connection(('127.0.0.1', 5901), timeout=2) as connection:
     assert connection.recv(12).startswith(b'RFB ')
-print(json.dumps({'pid': int(server.name)}))
+with urllib.request.urlopen('http://127.0.0.1:6080/vnc.html', timeout=2) as response:
+    assert response.status == 200 and b'noVNC' in response.read(), 'Browser client unavailable'
+print(json.dumps({'pid': int(server.name), 'nicotine_pid': int(nicotine.name)}))
 """
 
 
@@ -77,6 +92,7 @@ class ContainerRuntimeTests(unittest.TestCase):
             f"import os, signal; os.kill({initial['pid']}, signal.SIGTERM)",
         )
         replacement = self.wait_for_server(previous_pid=initial["pid"])
+        self.assertNotEqual(replacement["nicotine_pid"], initial["nicotine_pid"])
         time.sleep(3)
         self.assertEqual(self.wait_for_server()["pid"], replacement["pid"])
 

@@ -25,15 +25,16 @@ The base is Debian trixie-slim. GTK and Python bindings come from Debian package
 | Component | Responsibility |
 | --- | --- |
 | `scripts/init.sh` | Initialize user settings and GTK CSS, render the Supervisor template, and run Supervisor as PID 1 |
-| `etc/supervisord.conf.template` | Start and restart the display, VNC server, window manager, compositor, browser proxy, and Nicotine+ |
-| `scripts/start-vnc.sh` | Wait for the display and run VNC in the foreground on loopback port 5901 with shared-memory capture disabled |
-| Xvfb | Provide the virtual desktop at the configured resolution and 24-bit depth |
+| `etc/supervisord.conf.template` | Start and restart the integrated display/VNC server, window manager, compositor, browser proxy, and Nicotine+ |
+| Xtigervnc | Provide the virtual desktop and VNC server in one process, at the configured resolution and 24-bit depth; VNC listens on loopback port 5901 |
 | Openbox / `etc/xdg/openbox/rc.xml` | Keep the main window fullscreen and center dialogs with close controls |
 | Picom | Composite transparent popups with software XRender, full-frame repainting, and soft shadows |
 | `etc/nicotine/gtk.css` | Supply the default GTK dialog border without overwriting saved user styles |
 | noVNC / websockify | Serve the browser client and bridge WebSocket connections to VNC |
 
-Nicotine+ uses GTK4 with the Cairo renderer. The VNC wrapper must retain `-fg`: without it, Debian's wrapper detaches and Supervisor loses control of the server process. Supervisor stops the whole VNC process group during shutdown.
+Nicotine+ uses GTK4 with the Cairo renderer. Supervisor runs `/usr/bin/Xtigervnc` directly in the foreground, replacing Xvfb plus a separate scraping VNC server. The display uses a maximum of 30 VNC updates per second to limit encoding work during rapid changes. Picom retains the full-frame repainting workaround for popup artifacts.
+
+Supervisor stops the whole display process group during shutdown. If Xtigervnc fails, Supervisor restarts it; X clients lose their display connection and are restarted through their existing `autorestart` settings. The browser may need to reconnect. The VNC port remains loopback-only, and X11 TCP listening is disabled.
 
 ## Verification
 
@@ -43,14 +44,14 @@ The host startup tests require Python 3, Bash, and `envsubst` (provided by gette
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 ```
 
-This runs seven startup tests and skips the container test. To include the container test against a built image, run:
+This runs six startup tests and skips the container test. To include the container test against a built image, run:
 
 ```bash
 NICOTINE_TEST_IMAGE=nicotine-novnc:test \
   PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 ```
 
-The container test starts a disposable container, checks SVG icon decoding, GTK compositing and borders, verifies VNC remains supervised and speaks RFB, and checks recovery after terminating the actual VNC server. It removes its test container and anonymous volumes afterward.
+The container test starts a disposable container, checks SVG icon decoding, GTK compositing and borders, verifies the integrated display remains supervised and speaks RFB, and checks recovery after terminating the integrated display server. It removes its test container and anonymous volumes afterward.
 
 For browser verification, open menus and About, check icons and transparent backgrounds, close dialogs with the mouse, and look for repaint artifacts after overlapping windows. Soulseek login and file transfers require separate checks with an account; the automated tests do not cover them.
 
